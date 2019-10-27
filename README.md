@@ -75,7 +75,7 @@ After you run "Est_Data.py", you can run:
 
 $ python3 glmcc_fitting.py <the number of neurons> <Directory of the data> (sim or exp)  <Wfile>  all
 
-where, sim (exp) corresponds to simulated (experimental) data, and <Wfile> is the file name of the estimated connectivity matrix (e.g., W_py_5400.csv). Please note that this code requires an estimate of the connectivity matrix and you have to wait some time for plotting the cross-correlation. It takes around 5 mins when we analyze simulated data (20 neurons). The figure file will be "allCC.png". 
+where, sim (exp) corresponds to simulated (experimental) data, and <Wfile> is the file name of the estimated connectivity matrix (e.g., W_py_5400.csv). Please note that this code requires an estimate of the connectivity matrix and you have to wait some time for plotting the cross-correlation. It takes around 5 mins when we analyze simulated data (20 neurons). The figure file will be "allCC.png". The column (row) represents the index of the post (pre)-synaptic neuron (transposed matrix of "W_py_5400.csv"). 
 For example, you can analyze the simulation data in "simulation_data": 
 
 $ python3 glmcc_fitting.py 20 simulation_data sim  W_py_5400.csv  all
