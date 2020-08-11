@@ -43,9 +43,10 @@ for i in range(0, DataNum):
             delay_synapse = 3
             par, log_pos = GLMCC(cc_list[1], cc_list[0], tau, beta, cc_list[2], cc_list[3], delay_synapse)
         elif mode == 'exp':
+            log_pos = 0
             for m in range(2, 5):
                 tmp_par, tmp_log_pos = GLMCC(cc_list[1], cc_list[0], tau, beta, cc_list[2], cc_list[3], m)
-                if tmp_log_pos > log_pos:
+                if m == 2 or tmp_log_pos > log_pos:
                     log_pos = tmp_log_pos
                     par = tmp_par
                     delay_synapse = m
@@ -119,6 +120,7 @@ for i in range(0, n):
 
 #remove J file
 
+# debug
 cmd = ['rm', "J_py_"+str(T)+".txt"]
 proc.check_call(cmd)
 

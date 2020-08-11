@@ -661,7 +661,7 @@ def GLMCC(c, t_sp, tau, beta, pre, post, delay_synapse):
     return LM(par, beta, tau, new_c, n_sp, t_sp, delay_synapse)
 
 
-def calc_PSP(J, Jth, c_E=2.572, c_I=0.637):
+def calc_PSP(J, Jth, c_E=2.532, c_I=0.612):
     '''
     calculate PSP
 
