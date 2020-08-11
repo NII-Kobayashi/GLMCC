@@ -87,7 +87,4 @@ MIT
 Please contact [Ryota Kobayashi](http://research.nii.ac.jp/~r-koba/en/contact.html) if you want to use the code for commercial purposes.
 
 ## The program was developed by
-Junichi Haruna
-
-## The program was debugged by
-Masahiro Naito
+Junichi Haruna and Masahiro Naito
