@@ -88,3 +88,6 @@ Please contact [Ryota Kobayashi](http://research.nii.ac.jp/~r-koba/en/contact.ht
 
 ## The program was developed by
 Junichi Haruna
+
+## The program was debugged by
+Masahiro Naito
