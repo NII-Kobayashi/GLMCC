@@ -84,7 +84,8 @@ $ python3 glmcc_fitting.py 20 simulation_data sim  W_py_5400.csv  all
 ## Licence
 MIT
 
-Please contact [Ryota Kobayashi](http://research.nii.ac.jp/~r-koba/en/contact.html) if you want to use the code for commercial purposes.
+Please contact [Ryota Kobayashi](http://www.hk.k.u-tokyo.ac.jp/r-koba/en/contact.html) if you want to use the code for commercial purposes.
+
 
 ## The program was developed by
 Junichi Haruna and Masahiro Naito
