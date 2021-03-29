@@ -591,7 +591,7 @@ def LM(par, beta, tau, c, n_sp, t_sp, delay_synapse):
             return (par.T).tolist()[0], new_log_pos
     
         if l_c > 1000:
-            return false
+            return False
         
 
 def GLMCC(c, t_sp, tau, beta, pre, post, delay_synapse):
