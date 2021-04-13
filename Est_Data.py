@@ -127,7 +127,8 @@ for i in range(0, n):
 #remove J file
 
 # debug
-# cmd = ['rm', "J_py_"+str(T)+".txt"]
-# proc.check_call(cmd)
-os.remove("J_py_"+str(T)+".txt")
-
+if os.name is 'nt':
+    os.remove("J_py_"+str(T)+".txt")
+else:
+    cmd = ['rm', "J_py_"+str(T)+".txt"]
+    proc.check_call(cmd)
