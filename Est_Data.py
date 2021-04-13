@@ -37,7 +37,7 @@ for i in range(0, DataNum):
         #set tau
         tau = [4, 4]
         beta = 4000
-
+        corr_flag = True
         #Fitting a GLM
         if mode == 'sim':
             delay_synapse = 3
@@ -45,7 +45,12 @@ for i in range(0, DataNum):
         elif mode == 'exp':
             log_pos = 0
             for m in range(2, 5):
-                tmp_par, tmp_log_pos = GLMCC(cc_list[1], cc_list[0], tau, beta, cc_list[2], cc_list[3], m)
+                try:
+                    tmp_par, tmp_log_pos = GLMCC(cc_list[1], cc_list[0], tau, beta, cc_list[2], cc_list[3], m)
+                except:
+                    print("cc_list empty, no joint spikes")
+                    corr_flag = False
+                    continue
                 if m == 2 or tmp_log_pos > log_pos:
                     log_pos = tmp_log_pos
                     par = tmp_par
@@ -65,16 +70,16 @@ for i in range(0, DataNum):
             cc_0[l] = 0
             max[l] = int(tau[l] + 0.1)
             
-            if l == 0:
+            if l == 0 and corr_flag:
                 for m in range(max[l]):
                     cc_0[l] += np.exp(par[nb+int(delay_synapse)+m])
-            if l == 1:
+            if l == 1 and corr_flag:
                 for m in range(max[l]):
                     cc_0[l] += np.exp(par[nb-int(delay_synapse)-m])
 
             cc_0[l] = cc_0[l]/max[l]
-                    
-            Jmin[l] = math.sqrt(16.3/ tau[l]/ cc_0[l])
+            if corr_flag:
+                Jmin[l] = math.sqrt(16.3/ tau[l]/ cc_0[l])
             n12 = tau[l]*cc_0[l]
             if n12 <= 10:
                 par[NPAR-2+l] = 0
