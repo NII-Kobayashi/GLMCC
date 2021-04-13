@@ -13,6 +13,7 @@ example command : python3 Est_Data.py simulation_data 20 sim
 from glmcc import *
 import sys
 import subprocess as proc
+import os
 
 args = sys.argv
 
@@ -126,6 +127,7 @@ for i in range(0, n):
 #remove J file
 
 # debug
-cmd = ['rm', "J_py_"+str(T)+".txt"]
-proc.check_call(cmd)
+# cmd = ['rm', "J_py_"+str(T)+".txt"]
+# proc.check_call(cmd)
+os.remove("J_py_"+str(T)+".txt")
 
