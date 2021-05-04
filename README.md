@@ -50,9 +50,9 @@ where, <f_ref> (<f_tar>) is the file of spike times of the reference (target) ne
 
 You can also run this code to fit the GLM to spike cross-correlations: 
 
-$ python3 glmcc.py GLM <f_ref> <f_tar> tau_+ tau_- gamma T(s)
+$ python3 glmcc.py (GLM or LR) <f_ref> <f_tar> tau_+ tau_- gamma T(s)
 
-where, tau_+ (tau_-) is the time constant after (before) the spike times of the reference neuron,  gamma (the defualt parameter was gamma= 0.0005) is the hyper-parameter controling the faltness of a(t) (See Eq.(8) in the paper). This code generates an image file (GLMCC_<f_ref>_<f_tar>.png) that compares the histogram of Cross correlogram to its fit by GLMCC. For example, you can fit the cross-correlation from "cell9" and "cell4": 
+where, tau_+ (tau_-) is the time constant after (before) the spike times of the reference neuron,  gamma (the defualt parameter was gamma= 0.0005) is the hyper-parameter controling the faltness of a(t) (See Eq.(8) in the paper). This code generates an image file (GLMCC_<f_ref>_<f_tar>.png) that compares the histogram of Cross correlogram to its fit by GLMCC. If you choose GLM, original GLMCC will run. If you choose LR, revised version of GLMCC (see CoNNECT: Convolutional Neural Network for Estimating synaptic Connectivity from spike Trains) will run. For example, you can fit the cross-correlation from "cell9" and "cell4": 
 
 $ python3 glmcc.py GLM  cell9.txt  cell4.txt  4  4  0.0005  5400
 
@@ -62,23 +62,23 @@ Est_Data.py:
 This program estimates the connectivity matrix among the neurons in a directory. 
 You can run: 
 
-$ python3 Est_Data.py <Directory of the data> <the number of neurons> (sim or exp)
+$ python3 Est_Data.py <Directory of the data> <the number of neurons> (sim or exp) (GLM or LR)
 
-where, sim (exp) corresponds to simulated (experimental) data. The output file "W_py_5400.csv" is the estimate of the connectivity matrix (in the units of the post-synaptic potential). The column (row) represents the index of the pre(post)-synaptic neuron. 
+where, sim (exp) corresponds to simulated (experimental) data, and GLM (LR) corresponds to original GLMCC (revised GLMCC). The output file "W_py_5400.csv" is the estimate of the connectivity matrix (in the units of the post-synaptic potential). The column (row) represents the index of the pre(post)-synaptic neuron. 
 For example, you can analyze the simulation data in "simulation_data":  
 
-$ python3 Est_Data.py simulation_data 20 sim
+$ python3 Est_Data.py simulation_data 20 sim GLMCC
 
 glmcc_fitting.py: 
 This program generates a Cross-correlation figure for each pair of neurons. 
 After you run "Est_Data.py", you can run: 
 
-$ python3 glmcc_fitting.py <the number of neurons> <Directory of the data> (sim or exp)  <Wfile>  all
+$ python3 glmcc_fitting.py <the number of neurons> <Directory of the data> (sim or exp)  <Wfile>  all (GLM or LR)
 
-where, sim (exp) corresponds to simulated (experimental) data, and <Wfile> is the file name of the estimated connectivity matrix (e.g., W_py_5400.csv). Please note that this code requires an estimate of the connectivity matrix and you have to wait some time for plotting the cross-correlation. It takes around 5 mins when we analyze simulated data (20 neurons). The figure file will be "allCC.png". The column (row) represents the index of the post (pre)-synaptic neuron (transposed matrix of "W_py_5400.csv"). 
+where, sim (exp) corresponds to simulated (experimental) data, GLM (LR) corresponds to original GLMCC (revised GLMCC), and <Wfile> is the file name of the estimated connectivity matrix (e.g., W_py_5400.csv). Please note that this code requires an estimate of the connectivity matrix and you have to wait some time for plotting the cross-correlation. It takes around 5 mins when we analyze simulated data (20 neurons). The figure file will be "allCC.png". The column (row) represents the index of the post (pre)-synaptic neuron (transposed matrix of "W_py_5400.csv"). 
 For example, you can analyze the simulation data in "simulation_data": 
 
-$ python3 glmcc_fitting.py 20 simulation_data sim  W_py_5400.csv  all
+$ python3 glmcc_fitting.py 20 simulation_data sim  W_py_5400.csv  all GLMCC
 
 
 ## Licence

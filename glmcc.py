@@ -512,32 +512,32 @@ def calc_log_posterior(par, beta, tau, c, n_sp, t_sp, delay_synapse, Gk):
 
     --------------------------------------
     対数事後確率を求める関数
-    出力: log_post(float)
+    出力: log_post(float), log_likelihood(float)
     '''
-    log_post = 0
+    log_likelihood = 0
     
     for i in range(0, NPAR):
-        log_post += (par[i][0]*c[i])
+        log_likelihood += (par[i][0]*c[i])
 
     for i in range(0, NPAR-2):
-        log_post = log_post - Gk[i]
+        log_likelihood = log_likelihood - Gk[i]
     
     tmp = 0
     for i in range(0, NPAR-3):
         tmp += (par[i+1][0]-par[i][0])**2
     tmp = (beta/(2*DELTA)) * tmp
     
-    log_post -= tmp
+    log_post = log_likelihood - tmp
 
-    return log_post
+    return log_post, log_likelihood
     
-def LM(par, beta, tau, c, n_sp, t_sp, delay_synapse):
+def LM(par, beta, tau, c, n_sp, t_sp, delay_synapse, cond):
     '''
     calculate the best parameter whose log posterior probability is biggest by LM method
     This function does not end until the termination condition is satisfied.
     
     Output:
-    parameter (list), log_post (float) (if LM method's convergence condition is satisfied.)
+    parameter (list), log_post (float), log_likelihood(float) (if LM method's convergence condition is satisfied.)
     or
     false (if loop count is 1000.)
 
@@ -550,6 +550,9 @@ def LM(par, beta, tau, c, n_sp, t_sp, delay_synapse):
     C_lm = 0.01
     eta = 0.1
     l_c = 0
+
+    if cond > 0:
+        par[NPAR - 3 + cond] = 0
         
     while True:
         l_c += 1
@@ -557,14 +560,23 @@ def LM(par, beta, tau, c, n_sp, t_sp, delay_synapse):
         #print("現在のパラメータ")
         #print(par)
         Gk = calc_Gk(par, beta, tau, c, n_sp, t_sp, delay_synapse)
-        log_pos = calc_log_posterior(par, beta, tau, c, n_sp, t_sp, delay_synapse, Gk)
+        log_pos, log_likelihood = calc_log_posterior(par, beta, tau, c, n_sp, t_sp, delay_synapse, Gk)
         grad = calc_grad_log_p(par, beta, tau, c, n_sp, t_sp, delay_synapse, Gk)
         hessian = calc_hessian(par, beta, tau, c, n_sp, t_sp, delay_synapse, Gk)
+        if cond > 0:
+            idx = NPAR - 3 + cond
+            grad = np.delete(grad, idx, 0)
+            hessian = np.delete(np.delete(hessian, idx, 0), idx, 1)
         h_diag = np.diag(hessian)
-        tmp = np.eye(NPAR, NPAR)
-        for i in range(0, NPAR):
+        tmp = np.eye(h_diag.shape[0], h_diag.shape[0])
+        for i in range(0, tmp.shape[0]):
             tmp[i][i] = h_diag[i]
-        new_par = par - np.dot(np.linalg.inv(hessian + C_lm * tmp), grad)
+        if cond > 0:
+            idx = NPAR - 3 + cond
+            new_par = np.delete(par, idx, axis = 0) - np.dot(np.linalg.inv(hessian + C_lm * tmp), grad)
+            new_par = np.insert(new_par, idx, np.zeros(1), axis = 0)
+        else:
+            new_par = par - np.dot(np.linalg.inv(hessian + C_lm * tmp), grad)
 
         # Adjust J
         p_min = -3
@@ -578,7 +590,7 @@ def LM(par, beta, tau, c, n_sp, t_sp, delay_synapse):
 
         # Whether log posterior probability is increasing
         Gk = calc_Gk(new_par, beta, tau, c, n_sp, t_sp, delay_synapse)
-        new_log_pos = calc_log_posterior(new_par, beta, tau, c, n_sp, t_sp, delay_synapse, Gk)
+        new_log_pos, new_log_likelihood = calc_log_posterior(new_par, beta, tau, c, n_sp, t_sp, delay_synapse, Gk)
         if (new_log_pos >= log_pos):
             par = new_par
             C_lm = C_lm * eta
@@ -588,13 +600,13 @@ def LM(par, beta, tau, c, n_sp, t_sp, delay_synapse):
 
         # Whether the convergence condition is satisfied
         if (abs(new_log_pos - log_pos) < 1.0e-4):
-            return (par.T).tolist()[0], new_log_pos
+            return (par.T).tolist()[0], new_log_pos, new_log_likelihood
     
         if l_c > 1000:
             return False
         
 
-def GLMCC(c, t_sp, tau, beta, pre, post, delay_synapse):
+def GLMCC(c, t_sp, tau, beta, pre, post, delay_synapse, cond = 0):
     '''
     fit a GLM to the Cross correlogram
 
@@ -658,8 +670,16 @@ def GLMCC(c, t_sp, tau, beta, pre, post, delay_synapse):
     #print("par: ", par)
     #print(t_sp)
 
-    return LM(par, beta, tau, new_c, n_sp, t_sp, delay_synapse)
+    return LM(par, beta, tau, new_c, n_sp, t_sp, delay_synapse, cond)
 
+def calc_PSP_LR(J, D, z_a, c_E=2.532, c_I=0.612):
+    PSP = 0
+    if 2 * D > z_a:
+        if J >= 0:
+            PSP = c_E * J
+        else:
+            PSP = c_I * J
+    return PSP
 
 def calc_PSP(J, Jth, c_E=2.532, c_I=0.612):
     '''
@@ -1320,7 +1340,10 @@ if __name__ == '__main__':
             print_usage()
 
     elif len(args) == 8:
-        if args[1] == 'GLM':
+        if args[1] == 'GLM' or args[1] == 'LR':
+            LR = False
+            if args[1] == 'LR':
+                LR = True
             T = float(args[7])
             cc_list = linear_crossCorrelogram(args[3], args[2], T)
             tau = [0, 0]
@@ -1329,11 +1352,12 @@ if __name__ == '__main__':
             gamma = float(args[6])
             beta = 2.0/gamma
             delay_synapse = 1
-            par, log_pos = GLMCC(cc_list[1], cc_list[0], tau, beta, cc_list[2], cc_list[3], delay_synapse)
+            par, log_pos, log_likelihood = GLMCC(cc_list[1], cc_list[0], tau, beta, cc_list[2], cc_list[3], delay_synapse)
             for i in range(2, 5):
-                tmp_par, tmp_log_pos = GLMCC(cc_list[1], cc_list[0], tau, beta, cc_list[2], cc_list[3], i)
-                if tmp_log_pos > log_pos:
+                tmp_par, tmp_log_pos, tmp_log_likelihood = GLMCC(cc_list[1], cc_list[0], tau, beta, cc_list[2], cc_list[3], i)
+                if (not LR and tmp_log_pos > log_pos) and (LR and tmp_log_likelihood > log_likelihood):
                     log_pos = tmp_log_pos
+                    log_likelihood = tmp_log_likelihood
                     par = tmp_par
                     delay_synapse = i
 

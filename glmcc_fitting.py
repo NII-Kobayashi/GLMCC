@@ -6,11 +6,14 @@ import sys
 
 args = sys.argv
 
-if len(args) != 6:
-    print("python glmcc_fitting.py cell_num cell_dir (sim or exp) Wfile_pass (all or sgn)")
+if len(args) != 7:
+    print("python glmcc_fitting.py cell_num cell_dir (sim or exp) Wfile_pass (all or sgn) (GLM or LR)")
     exit(0)
 
 cell_num = int(args[1])
+LR = False
+if args[6] == "LR":
+    LR = True
 
 plt.figure(figsize=(50,50),dpi=600)
 for i in range(0, cell_num):
@@ -34,21 +37,23 @@ for i in range(0, cell_num):
         #Fitting a GLM
         if args[3] == 'exp':
             delay_synapse = 1
-            par, log_pos = GLMCC(cc_list[1], cc_list[0], tau, beta, cc_list[2], cc_list[3], delay_synapse)
+            par, log_pos, log_likelihood = GLMCC(cc_list[1], cc_list[0], tau, beta, cc_list[2], cc_list[3], delay_synapse)
             #print('J+: '+str(par[NPAR-2])+' J-: '+str(par[NPAR-1]))
         
             for m in range(2, 5):
-                tmp_par, tmp_log_pos = GLMCC(cc_list[1], cc_list[0], tau, beta, cc_list[2], cc_list[3], m)
-                if tmp_log_pos > log_pos:
+                tmp_par, tmp_log_pos, tmp_log_likelihood = GLMCC(cc_list[1], cc_list[0], tau, beta, cc_list[2], cc_list[3], m)
+                if (not LR and tmp_log_pos > log_pos) or (LR and tmp_log_likelihood > log_likelihood):
                     log_pos = tmp_log_pos
+                    log_likelihood = tmp_log_likelihood
                     par = tmp_par
                     delay_synapse = m
 
         elif args[3] == 'sim':
             delay_synapse = 3
-            par, log_pos = GLMCC(cc_list[1], cc_list[0], tau, beta, cc_list[2], cc_list[3], delay_synapse)
+            par, log_pos, log_likelihood = GLMCC(cc_list[1], cc_list[0], tau, beta, cc_list[2], cc_list[3], delay_synapse)
             #print('J+: '+str(par[NPAR-2])+' J-: '+str(par[NPAR-1]))
 
+        """
         #Connection parameters
         nb = int(WIN/DELTA)
         cc_0 = [0 for l in range(2)]
@@ -90,6 +95,7 @@ for i in range(0, cell_num):
             # We do not plot for the nonsignificant pairs
             if W[j][i] == 0:
                 continue
+        """
 
         # Plot the cross-correlerogram. 実験データとシミュレーションデータの処理は-1<t<1を取り除くため、分けて処理する. 
         plt.subplot(cell_num, cell_num, i*cell_num+j+1)
