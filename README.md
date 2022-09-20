@@ -2,7 +2,7 @@
 GLMCC: The generalized linear model for spike cross-correlation 
 
 ## Outline
-This program estimates interneuronal connections by fitting a generalized linear model (GLM) to spike cross-correlations (Kobayashi et al., Nature Communications 2019). 
+This program estimates interneuronal connections by fitting a generalized linear model (GLM) to spike cross-correlations (Kobayashi et al., Nature Communications 2019). A ready-to-use version of the web application is available at [our website](https://s-shinomoto.com/CONNECT/).
 For details, see [here](https://www.nature.com/articles/s41467-019-12225-2).
 
 ## Requirement
