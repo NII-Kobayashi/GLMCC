@@ -42,33 +42,20 @@ for i in range(0, DataNum):
 
         #set tau
         tau = [4, 4]
-#<<<<<<< master
-#        beta = 4000
-#        corr_flag = True
-#=======
 
-#>>>>>>> master
         #Fitting a GLM
         if mode == 'sim':
             delay_synapse = 3
             par, log_pos, log_likelihood = GLMCC(cc_list[1], cc_list[0], tau, beta, cc_list[2], cc_list[3], delay_synapse)
         elif mode == 'exp':
             log_pos = 0
-#<<<<<<< master
-#            for m in range(2, 5):
-#                try:
-                    tmp_par, tmp_log_pos = GLMCC(cc_list[1], cc_list[0], tau, beta, cc_list[2], cc_list[3], m)
-#                except:
-#                    print("cc_list empty, no joint spikes")
-#                    corr_flag = False
-#                    continue
-#                if m == 2 or tmp_log_pos > log_pos:
-#=======
+            tmp_par, tmp_log_pos = GLMCC(cc_list[1], cc_list[0], tau, beta, cc_list[2], cc_list[3], m)
+
             log_likelihood = 0
             for m in range(1, 5):
                 tmp_par, tmp_log_pos, tmp_log_likelihood = GLMCC(cc_list[1], cc_list[0], tau, beta, cc_list[2], cc_list[3], m)
                 if m == 1 or (not LR and tmp_log_pos > log_pos) or (LR and tmp_log_likelihood > log_likelihood):
-#>>>>>>> master
+
                     log_pos = tmp_log_pos
                     log_likelihood = tmp_log_likelihood
                     par = tmp_par
