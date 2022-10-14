@@ -13,6 +13,7 @@ example command : python3 Est_Data.py simulation_data 20 sim
 from glmcc import *
 import sys
 import subprocess as proc
+import os
 
 args = sys.argv
 
@@ -48,10 +49,13 @@ for i in range(0, DataNum):
             par, log_pos, log_likelihood = GLMCC(cc_list[1], cc_list[0], tau, beta, cc_list[2], cc_list[3], delay_synapse)
         elif mode == 'exp':
             log_pos = 0
+            tmp_par, tmp_log_pos = GLMCC(cc_list[1], cc_list[0], tau, beta, cc_list[2], cc_list[3], m)
+
             log_likelihood = 0
             for m in range(1, 5):
                 tmp_par, tmp_log_pos, tmp_log_likelihood = GLMCC(cc_list[1], cc_list[0], tau, beta, cc_list[2], cc_list[3], m)
                 if m == 1 or (not LR and tmp_log_pos > log_pos) or (LR and tmp_log_likelihood > log_likelihood):
+
                     log_pos = tmp_log_pos
                     log_likelihood = tmp_log_likelihood
                     par = tmp_par
@@ -71,16 +75,16 @@ for i in range(0, DataNum):
             cc_0[l] = 0
             max[l] = int(tau[l] + 0.1)
             
-            if l == 0:
+            if l == 0 and corr_flag:
                 for m in range(max[l]):
                     cc_0[l] += np.exp(par[nb+int(delay_synapse)+m])
-            if l == 1:
+            if l == 1 and corr_flag:
                 for m in range(max[l]):
                     cc_0[l] += np.exp(par[nb-int(delay_synapse)-m])
 
             cc_0[l] = cc_0[l]/max[l]
-                    
-            Jmin[l] = math.sqrt(16.3/ tau[l]/ cc_0[l])
+            if corr_flag:
+                Jmin[l] = math.sqrt(16.3/ tau[l]/ cc_0[l])
             n12 = tau[l]*cc_0[l]
             if n12 <= 10:
                 par[NPAR-2+l] = 0
@@ -142,6 +146,8 @@ for i in range(0, n):
 #remove J file
 
 # debug
-cmd = ['rm', "J_py_"+str(T)+".txt"]
-proc.check_call(cmd)
-
+if os.name is 'nt':
+    os.remove("J_py_"+str(T)+".txt")
+else:
+    cmd = ['rm', "J_py_"+str(T)+".txt"]
+    proc.check_call(cmd)
